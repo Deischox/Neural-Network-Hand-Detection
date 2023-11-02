@@ -2,6 +2,7 @@ import numpy as np
 from activation import sigmoid
 
 
+
 class Layer:
     def __init__(self, input_size, output_size, activation_function=sigmoid):
         self.weights = np.random.randn(
