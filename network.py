@@ -21,8 +21,6 @@ def forward(net, X):
 
 
 def loss(OL, y, compute_derivative=False):
-    """Squared L2 loss (or its derivative with respect to the first argument)."""
-
     diff = OL - y
     if not compute_derivative:
         return np.mean(diff * diff)  # mean squared L2 norm (MSE)
