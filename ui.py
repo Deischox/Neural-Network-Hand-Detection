@@ -25,15 +25,15 @@ def draw_grid(screen, grid):
 
 def saveAsCSV(numpy_array):
     numpy_array = numpy_array[:,:,0].flatten()
-    #predictDrawing(numpy_array)
-    csv_file_path = "numpy_array_2.csv"
-    with open(csv_file_path, "ab") as f:
-        # Save the NumPy array to a CSV file
-        f.write(b"\n")
-        f.write(b"8,")
-        np.savetxt(f, numpy_array, fmt='%d', newline=',', delimiter=",")
+    predictDrawing(numpy_array)
+    # csv_file_path = "numpy_array_2.csv"
+    # with open(csv_file_path, "ab") as f:
+    #     # Save the NumPy array to a CSV file
+    #     f.write(b"\n")
+    #     f.write(b"8,")
+    #     np.savetxt(f, numpy_array, fmt='%d', newline=',', delimiter=",")
 
-    print(f"NumPy array saved as {csv_file_path}")
+    # print(f"NumPy array saved as {csv_file_path}")
 
 def main():
     pygame.init()
@@ -68,7 +68,7 @@ def main():
                 # grid[grid_y][grid_x-1] = GRAY
             elif event.type == pygame.MOUSEBUTTONUP:
                 drawing = False
-                #saveAsCSV(np.array(grid))
+                saveAsCSV(np.array(grid))
             elif event.type == pygame.MOUSEMOTION and drawing:
                 x, y = event.pos
                 grid_x, grid_y = x // CELL_SIZE, y // CELL_SIZE
