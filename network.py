@@ -1,12 +1,10 @@
 import numpy as np
 import time
 from layer import Layer
-from activation import ReLU, sigmoid
 import matplotlib.pyplot as plt
-
+import os
 
 def forward(net, X):
-
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
     A = [None] * L  # list that collects the activation tensors computed at each layer
@@ -38,6 +36,41 @@ def update(net, lr=0.001):
     for layer in net:
         layer.updateWeights(lr)
 
+def onlineTraining():
+    
+    train_network = True
+    save_as = "online.npy"
+    batch_size = 2
+
+    # Define Data
+    image_size = 28  # width and length
+    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
+    image_pixels = image_size * image_size
+
+    # Read Data from CSV File
+    test_data = np.loadtxt("online.csv",
+                           delimiter=",")[-1:]
+    fac = 0.99 / 255
+
+    # include batch here
+    test_imgs = np.asfarray(test_data[:, 1:]) * fac + 0.01
+    test_labels = np.asfarray(test_data[:, :1])
+    lr = np.arange(no_of_different_labels)
+    # transform labels into one hot representation
+    test_labels_one_hot = (lr == test_labels).astype(np.float64)
+
+    # we don't want zeroes and ones in the labels neither:
+    test_labels_one_hot[test_labels_one_hot == 0] = 0.01
+    test_labels_one_hot[test_labels_one_hot == 1] = 0.99
+
+
+    # define the network
+    my_net = np.load("online.npy", allow_pickle=True)
+
+    # training the network
+    train(my_net, test_imgs, test_labels_one_hot,
+            epochs=100, lr=0.1, batch_size=1)
+    np.save(save_as, my_net)
 
 def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
     """Train a neural network for multiple epochs."""
@@ -49,7 +82,6 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
         np.random.shuffle(randomizer)
         X = X[randomizer]
         Y = Y[randomizer]
-
         outputs, activation_scores = forward(net, X)  # going forward
         loss_value = loss(outputs[-1], Y)
 
@@ -65,8 +97,11 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 def predictDrawing(data):
     fac = 0.99 / 255
+    if not os.path.isfile("online.npy"):
+        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, 2)]
+        np.save("online.npy", my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
-    my_net = np.load('selfmade.npy', allow_pickle=True)
+    my_net = np.load('online.npy', allow_pickle=True)
     net_outputs, _ = forward(my_net, test_imgs)
     print(net_outputs[-1])
 
@@ -74,16 +109,16 @@ def predictDrawing(data):
 if __name__ == "__main__":
 
     train_network = False
-    save_as = "selfmade.npy"
-    batch_size = 20
+    save_as = "drawing.npy"
+    batch_size = 2
 
     # Define Data
     image_size = 28  # width and length
-    no_of_different_labels = 10  # i.e. 0, 1, 2, 3, ..., 9
+    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("numpy_array_2.csv",
+    test_data = np.loadtxt("drawing.csv",
                            delimiter=",")
     fac = 0.99 / 255
 
@@ -91,7 +126,6 @@ if __name__ == "__main__":
     test_imgs = np.asfarray(test_data[:, 1:]) * fac + 0.01
     test_labels = np.asfarray(test_data[:, :1])
     lr = np.arange(no_of_different_labels)
-
     # transform labels into one hot representation
     test_labels_one_hot = (lr == test_labels).astype(np.float64)
 
@@ -103,16 +137,16 @@ if __name__ == "__main__":
     if train_network:
 
         # define the network
-        my_net = [Layer(image_pixels, 16), Layer(16, 16), Layer(16, 10)]
+        my_net = [Layer(image_pixels, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
         net_outputs, _ = forward(my_net, test_imgs)
 
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=500000, lr=0.1, batch_size=145)
+              epochs=10000, lr=0.1, batch_size=2)
         duration = time.time()-start
         np.save(save_as, my_net)
-    my_net = np.load('selfmade.npy', allow_pickle=True)
+    my_net = np.load('drawing.npy', allow_pickle=True)
 
     """
     Results:
