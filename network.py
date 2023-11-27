@@ -96,6 +96,7 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 
 def predictDrawing(data):
+    global no_of_different_labels
     fac = 0.99 / 255
     if not os.path.isfile("online.npy"):
         my_net = [Layer(784, 16), Layer(16, 16), Layer(16, 2)]
@@ -135,11 +136,9 @@ if __name__ == "__main__":
 
     duration = None
     if train_network:
-
         # define the network
         my_net = [Layer(image_pixels, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
         net_outputs, _ = forward(my_net, test_imgs)
-
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,

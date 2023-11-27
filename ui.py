@@ -36,7 +36,7 @@ house = True
 def saveAsCSV(numpy_array):
     global house
     numpy_array = numpy_array[:,:,0].flatten()
-    csv_file_path = "online.csv"
+    csv_file_path = "drawing.csv"
     with open(csv_file_path, "a", newline='') as f:
         # Save the NumPy array to a CSV file
         writer = csv.writer(f)
@@ -66,8 +66,8 @@ def main():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
-                    saveAsCSV(np.array(grid))
-                    onlineTraining()
+                    #saveAsCSV(np.array(grid))
+                    #onlineTraining()
                     grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 drawing = True
@@ -83,8 +83,10 @@ def main():
             elif event.type == pygame.MOUSEMOTION and drawing:
                 x, y = event.pos
                 grid_x, grid_y = x // CELL_SIZE, y // CELL_SIZE
-                grid[grid_y][grid_x] = CURRENT_COLOR
-                predict(np.array(grid))
+                if grid_x >= 0 and grid_x < len(grid) and grid_y >= 0 and grid_y < len(grid[0]):
+                    
+                    grid[grid_y][grid_x] = CURRENT_COLOR
+                    predict(np.array(grid))
 
         screen.fill(WHITE)
         draw_grid(screen, grid)
