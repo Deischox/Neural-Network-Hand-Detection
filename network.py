@@ -39,7 +39,7 @@ def update(net, lr=0.001):
 def onlineTraining():
     
     train_network = True
-    save_as = "online.npy"
+    save_as = "bp.npy"
     batch_size = 2
 
     # Define Data
@@ -48,7 +48,7 @@ def onlineTraining():
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("online.csv",
+    test_data = np.loadtxt("bp.csv",
                            delimiter=",")[-1:]
     fac = 0.99 / 255
 
@@ -65,7 +65,7 @@ def onlineTraining():
 
 
     # define the network
-    my_net = np.load("online.npy", allow_pickle=True)
+    my_net = np.load("bp.npy", allow_pickle=True)
 
     # training the network
     train(my_net, test_imgs, test_labels_one_hot,
@@ -97,11 +97,11 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 def predictDrawing(data):
     fac = 0.99 / 255
-    if not os.path.isfile("online.npy"):
+    if not os.path.isfile("bp.npy"):
         my_net = [Layer(784, 16), Layer(16, 16), Layer(16, 2)]
-        np.save("online.npy", my_net)
+        np.save("bp.npy", my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
-    my_net = np.load('online.npy', allow_pickle=True)
+    my_net = np.load('bp.npy', allow_pickle=True)
     net_outputs, _ = forward(my_net, test_imgs)
     print(net_outputs[-1])
 

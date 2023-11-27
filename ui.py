@@ -31,10 +31,9 @@ def draw_grid(screen, grid):
         for x, color in enumerate(row):
             pygame.draw.rect(screen, color, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-#class_index = 0 #0=house, 1=car, 2=....
+#0=house, 1=car, 2=....
 pygame_number_list = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
 def saveAsCSV(numpy_array, class_index):
-    global house
     numpy_array = numpy_array[:,:,0].flatten()
     csv_file_path = "bp.csv"
     with open(csv_file_path, "a", newline='') as f:
