@@ -31,21 +31,20 @@ def draw_grid(screen, grid):
         for x, color in enumerate(row):
             pygame.draw.rect(screen, color, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-house = True
-
-def saveAsCSV(numpy_array):
-    global house
+#0=house, 1=car, 2=....
+pygame_number_list = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]
+def saveAsCSV(numpy_array, class_index):
     numpy_array = numpy_array[:,:,0].flatten()
-    csv_file_path = "online.csv"
+    csv_file_path = "bp.csv"
     with open(csv_file_path, "a", newline='') as f:
         # Save the NumPy array to a CSV file
         writer = csv.writer(f)
-        if house:
-            writer.writerow(['0'] + numpy_array.tolist())
-            house = False
-        else:
-            writer.writerow(['1'] + numpy_array.tolist())
-            house = True
+        match class_index:
+            case pygame.K_0:
+                writer.writerow(['0'] + numpy_array.tolist())
+            case pygame.K_1:
+                writer.writerow(['1'] + numpy_array.tolist())
+
     print(f"NumPy array saved as {csv_file_path}")
 
 def predict(numpy_array):
@@ -65,8 +64,8 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_s:
-                    saveAsCSV(np.array(grid))
+                if event.key in pygame_number_list:
+                    saveAsCSV(np.array(grid), event.key)
                     onlineTraining()
                     grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]
             elif event.type == pygame.MOUSEBUTTONDOWN:
