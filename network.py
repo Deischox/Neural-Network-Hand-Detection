@@ -4,6 +4,7 @@ from layer import Layer
 import matplotlib.pyplot as plt
 import os
 
+no_of_different_labels = 3
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -44,7 +45,6 @@ def onlineTraining():
 
     # Define Data
     image_size = 28  # width and length
-    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
@@ -96,10 +96,9 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 
 def predictDrawing(data):
-    global no_of_different_labels
     fac = 0.99 / 255
     if not os.path.isfile("bp.npy"):
-        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, 2)]
+        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
         np.save("bp.npy", my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
     my_net = np.load('bp.npy', allow_pickle=True)
@@ -115,7 +114,6 @@ if __name__ == "__main__":
 
     # Define Data
     image_size = 28  # width and length
-    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
