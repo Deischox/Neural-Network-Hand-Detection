@@ -70,6 +70,8 @@ def main():
                     saveAsCSV(np.array(grid), event.key)
                     onlineTraining()
                     grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]
+                elif event.key == pygame.K_d:
+                    grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 drawing = True
                 x, y = event.pos
