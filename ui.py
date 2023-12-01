@@ -46,6 +46,8 @@ def saveAsCSV(numpy_array, class_index):
                 writer.writerow(['1'] + numpy_array.tolist())
             case pygame.K_2:
                 writer.writerow(['2'] + numpy_array.tolist())
+            case pygame.K_3:
+                writer.writerow(['3'] + numpy_array.tolist())
 
     print(f"NumPy array saved as {csv_file_path}")
 
