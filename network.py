@@ -4,7 +4,7 @@ from layer import Layer
 import matplotlib.pyplot as plt
 import os
 
-no_of_different_labels = 4
+no_of_different_labels = 5
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -48,7 +48,7 @@ def onlineTraining():
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("bp.csv",
+    test_data = np.loadtxt("bp.csv", #test_data is only last row
                            delimiter=",")[-1:]
     fac = 0.99 / 255
 

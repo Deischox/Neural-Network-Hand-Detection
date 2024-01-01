@@ -41,13 +41,15 @@ def saveAsCSV(numpy_array, class_index):
         writer = csv.writer(f)
         match class_index:
             case pygame.K_0:
-                writer.writerow(['0'] + numpy_array.tolist())
+                writer.writerow(['0'] + numpy_array.tolist()) #house
             case pygame.K_1:
-                writer.writerow(['1'] + numpy_array.tolist())
+                writer.writerow(['1'] + numpy_array.tolist()) #car
             case pygame.K_2:
-                writer.writerow(['2'] + numpy_array.tolist())
+                writer.writerow(['2'] + numpy_array.tolist()) #wireless headphones
             case pygame.K_3:
-                writer.writerow(['3'] + numpy_array.tolist())
+                writer.writerow(['3'] + numpy_array.tolist()) #bottle
+            case pygame.K_4:
+                writer.writerow(['4'] + numpy_array.tolist())  #wired on ear headphones
 
     print(f"NumPy array saved as {csv_file_path}")
 

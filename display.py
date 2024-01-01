@@ -88,6 +88,9 @@ def rows_without_removed_indices(indices):
 
 
 def main():
+    print("--> Navigate with arrow keys")
+    print("--> Press 'd' to delete current image")
+
     pygame.init()
     screen = pygame.display.set_mode((GRID_WIDTH, GRID_HEIGHT))
     pygame.display.set_caption("Display Grid")
