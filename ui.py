@@ -49,7 +49,7 @@ def saveAsCSV(numpy_array, class_index):
             case pygame.K_3:
                 writer.writerow(['3'] + numpy_array.tolist()) #bottle
             case pygame.K_4:
-                writer.writerow(['4'] + numpy_array.tolist())  #wired on ear headphones
+                writer.writerow(['4'] + numpy_array.tolist())  #on ear headphones
             case pygame.K_5:
                 writer.writerow(['5'] + numpy_array.tolist())  # stick man
 
@@ -59,6 +59,10 @@ def predict(numpy_array):
     numpy_array = numpy_array[:,:,0].flatten()
     predictDrawing(numpy_array)
 def main():
+    print("Draw by pressing left mousebutton and press a key (0-7) to save it and online train the model")#
+    print("Pressing the right mousebutton removes the pixel from that location ")
+    print("Press d to delete the current drawing and start fresh")
+    print("0 --> House\n1-->Car\n2-->Inear headphones\n3-->Bottle\n4-->On ear headphones\n5-->stick man")
     pygame.init()
     screen = pygame.display.set_mode((GRID_WIDTH, GRID_HEIGHT))
     pygame.display.set_caption("Drawing Grid")
