@@ -4,7 +4,7 @@ from layer import Layer
 import matplotlib.pyplot as plt
 import os
 
-no_of_different_labels = 5
+no_of_different_labels = 6
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer

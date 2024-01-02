@@ -50,6 +50,8 @@ def saveAsCSV(numpy_array, class_index):
                 writer.writerow(['3'] + numpy_array.tolist()) #bottle
             case pygame.K_4:
                 writer.writerow(['4'] + numpy_array.tolist())  #wired on ear headphones
+            case pygame.K_5:
+                writer.writerow(['5'] + numpy_array.tolist())  # stick man
 
     print(f"NumPy array saved as {csv_file_path}")
 
