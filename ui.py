@@ -54,24 +54,29 @@ def saveAsCSV(numpy_array, class_index):
                 writer.writerow(['5'] + numpy_array.tolist())  # stick man
             case pygame.K_6:
                 writer.writerow(['6'] + numpy_array.tolist())  # TV-screen
-
+            case pygame.K_7:
+                writer.writerow(['7'] + numpy_array.tolist())  # Sun
     print(f"NumPy array saved as {csv_file_path}")
 
 def predict(numpy_array):
     numpy_array = numpy_array[:,:,0].flatten()
     predictDrawing(numpy_array)
+
+def get_csv_size(name):
+    with open(name) as file:
+        return sum(1 for row in file)
 def main():
     print("Draw by pressing left mousebutton and press a key (0-7) to save it and online train the model")#
     print("Pressing the right mousebutton removes the pixel from that location ")
     print("Press d to delete the current drawing and start fresh")
-    print("0 --> House\n1 --> Car\n2 --> Inear headphones\n3 --> Bottle\n4 --> On ear headphones\n5 --> stick man\n6 --> tv-screen")
+    print("0 --> House\n1 --> Car\n2 --> Inear headphones\n3 --> Bottle\n4 --> On ear headphones\n5 --> Stick man\n6 --> TV-screen\n7 --> Sun")
     pygame.init()
     screen = pygame.display.set_mode((GRID_WIDTH, GRID_HEIGHT))
     pygame.display.set_caption("Drawing Grid")
 
     grid = create_grid()
     drawing = False
-
+    last_index = get_csv_size("bp.csv")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -80,7 +85,8 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key in pygame_number_list:
                     saveAsCSV(np.array(grid), event.key)
-                    onlineTraining()
+                    onlineTraining(last_index)
+                    last_index += 1
                     grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]
                 elif event.key == pygame.K_d:
                     grid = [[WHITE] * GRID_SIZE for _ in range(GRID_SIZE)]

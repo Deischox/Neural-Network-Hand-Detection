@@ -1,10 +1,12 @@
+from random import random
+
 import numpy as np
 import time
 from layer import Layer
 import matplotlib.pyplot as plt
 import os
 
-no_of_different_labels = 7
+no_of_different_labels = 8
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -37,18 +39,38 @@ def update(net, lr=0.001):
     for layer in net:
         layer.updateWeights(lr)
 
-def onlineTraining():
+#Exclude class because we want one sample from each class and the new sample for current online training is also in one of the classes already
+def get_random_element_from_each_class():
+    class_labels = np.arange(0, 8)
+    csv_file = np.loadtxt("bp.csv", delimiter=",")
+    new_example = csv_file[-1:]
+    training_data = np.asarray(new_example)
+    # get test data class
+    label_of_new_example = int(new_example[0,0])
+    class_labels = class_labels[class_labels != label_of_new_example]
+    for clazz in class_labels:
+        #TODO how to get label here?
+        temp = [row for row in csv_file if int(row[0]) == clazz]
+        index = np.random.randint(0, len(temp))
+        random_element = temp[index]
+        training_data = np.append(training_data, random_element)
+
+    # return array
+    return training_data.reshape(no_of_different_labels, 785)
+def onlineTraining(last_index):
     
-    train_network = True
     save_as = "bp.npy"
-    batch_size = 2
+    batch_size = no_of_different_labels
 
     # Define Data
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("bp.csv", #test_data is only last row
+    if last_index % 1 == 0: #TODO change to any other value
+        test_data = get_random_element_from_each_class()
+    else:
+        test_data = np.loadtxt("bp.csv", #test_data is only last row
                            delimiter=",")[-1:]
     fac = 0.99 / 255
 
@@ -69,7 +91,7 @@ def onlineTraining():
 
     # training the network
     train(my_net, test_imgs, test_labels_one_hot,
-            epochs=100, lr=0.1, batch_size=1)
+            epochs=100, lr=0.1, batch_size=1) #TODO lr seems pretty large as well in general?
     np.save(save_as, my_net)
 
 def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
