@@ -67,30 +67,30 @@ def onlineTraining(last_index):
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    if last_index % 1 == 0: #TODO change to any other value
-        test_data = get_random_element_from_each_class()
+    if last_index % 5 == 0:
+        training_data = get_random_element_from_each_class()
     else:
-        test_data = np.loadtxt("bp.csv", #test_data is only last row
+        training_data = np.loadtxt("bp.csv", #test_data is only last row
                            delimiter=",")[-1:]
     fac = 0.99 / 255
 
     # include batch here
-    test_imgs = np.asfarray(test_data[:, 1:]) * fac + 0.01
-    test_labels = np.asfarray(test_data[:, :1])
+    training_imgs = np.asfarray(training_data[:, 1:]) * fac + 0.01
+    training_labels = np.asfarray(training_data[:, :1])
     lr = np.arange(no_of_different_labels)
     # transform labels into one hot representation
-    test_labels_one_hot = (lr == test_labels).astype(np.float64)
+    training_labels_one_hot = (lr == training_labels).astype(np.float64)
 
     # we don't want zeroes and ones in the labels neither:
-    test_labels_one_hot[test_labels_one_hot == 0] = 0.01
-    test_labels_one_hot[test_labels_one_hot == 1] = 0.99
+    training_labels_one_hot[training_labels_one_hot == 0] = 0.01
+    training_labels_one_hot[training_labels_one_hot == 1] = 0.99
 
 
     # define the network
     my_net = np.load("bp.npy", allow_pickle=True)
 
     # training the network
-    train(my_net, test_imgs, test_labels_one_hot,
+    train(my_net, training_imgs, training_labels_one_hot,
             epochs=100, lr=0.1, batch_size=1) #TODO lr seems pretty large as well in general?
     np.save(save_as, my_net)
 
