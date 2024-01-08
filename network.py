@@ -38,18 +38,15 @@ def backward(net, A, d_loss):
 def update(net, lr=0.001):
     for layer in net:
         layer.updateWeights(lr)
-
-#Exclude class because we want one sample from each class and the new sample for current online training is also in one of the classes already
+# Returns current online training example and random element from each other class
 def get_random_element_from_each_class():
     class_labels = np.arange(0, 8)
     csv_file = np.loadtxt("bp.csv", delimiter=",")
     new_example = csv_file[-1:]
     training_data = np.asarray(new_example)
-    # get test data class
     label_of_new_example = int(new_example[0,0])
-    class_labels = class_labels[class_labels != label_of_new_example]
-    for clazz in class_labels:
-        #TODO how to get label here?
+    class_labels_without_new_example = class_labels[class_labels != label_of_new_example]
+    for clazz in class_labels_without_new_example:
         temp = [row for row in csv_file if int(row[0]) == clazz]
         index = np.random.randint(0, len(temp))
         random_element = temp[index]
