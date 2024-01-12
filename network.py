@@ -63,10 +63,14 @@ def onlineTraining(last_index):
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
+    #TODO remve
+    print_after = False
     # Read Data from CSV File
-    if last_index % 5 == 0:
+    if last_index % 2 == 0:
+        print_after = True
         training_data = get_random_element_from_each_class()
     else:
+        print_after = False
         training_data = np.loadtxt("bp.csv", #test_data is only last row
                            delimiter=",")[-1:]
     fac = 0.99 / 255
@@ -88,8 +92,10 @@ def onlineTraining(last_index):
 
     # training the network
     train(my_net, training_imgs, training_labels_one_hot,
-            epochs=100, lr=0.1, batch_size=1) #TODO lr seems pretty large as well in general?
+            epochs=2, lr=0.01, batch_size=len(training_imgs)) #TODO lr seems pretty large as well in general?
     np.save(save_as, my_net)
+    if print_after:
+        print("next is after batch of other elements")
 
 def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
     """Train a neural network for multiple epochs."""
@@ -159,7 +165,7 @@ if __name__ == "__main__":
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=10000, lr=0.1, batch_size=2)
+              epochs=10000, lr=0.01, batch_size=2)
         duration = time.time()-start
         np.save(save_as, my_net)
     my_net = np.load('drawing.npy', allow_pickle=True)
