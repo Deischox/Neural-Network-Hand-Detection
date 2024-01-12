@@ -1,9 +1,12 @@
+from random import random
+
 import numpy as np
 import time
 from layer import Layer
 import matplotlib.pyplot as plt
 import os
 
+no_of_different_labels = 8
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -35,42 +38,64 @@ def backward(net, A, d_loss):
 def update(net, lr=0.001):
     for layer in net:
         layer.updateWeights(lr)
+# Returns current online training example and random element from each other class
+def get_random_element_from_each_class():
+    class_labels = np.arange(0, 8)
+    csv_file = np.loadtxt("bp.csv", delimiter=",")
+    new_example = csv_file[-1:]
+    training_data = np.asarray(new_example)
+    label_of_new_example = int(new_example[0,0])
+    class_labels_without_new_example = class_labels[class_labels != label_of_new_example]
+    for clazz in class_labels_without_new_example:
+        temp = [row for row in csv_file if int(row[0]) == clazz]
+        index = np.random.randint(0, len(temp))
+        random_element = temp[index]
+        training_data = np.append(training_data, random_element)
 
-def onlineTraining():
+    # return array
+    return training_data.reshape(no_of_different_labels, 785)
+def onlineTraining(last_index):
     
-    train_network = True
     save_as = "bp.npy"
-    batch_size = 2
+    batch_size = no_of_different_labels
 
     # Define Data
     image_size = 28  # width and length
-    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
     image_pixels = image_size * image_size
 
+    #TODO remve
+    print_after = False
     # Read Data from CSV File
-    test_data = np.loadtxt("bp.csv",
+    if last_index % 2 == 0:
+        print_after = True
+        training_data = get_random_element_from_each_class()
+    else:
+        print_after = False
+        training_data = np.loadtxt("bp.csv", #test_data is only last row
                            delimiter=",")[-1:]
     fac = 0.99 / 255
 
     # include batch here
-    test_imgs = np.asfarray(test_data[:, 1:]) * fac + 0.01
-    test_labels = np.asfarray(test_data[:, :1])
+    training_imgs = np.asfarray(training_data[:, 1:]) * fac + 0.01
+    training_labels = np.asfarray(training_data[:, :1])
     lr = np.arange(no_of_different_labels)
     # transform labels into one hot representation
-    test_labels_one_hot = (lr == test_labels).astype(np.float64)
+    training_labels_one_hot = (lr == training_labels).astype(np.float64)
 
     # we don't want zeroes and ones in the labels neither:
-    test_labels_one_hot[test_labels_one_hot == 0] = 0.01
-    test_labels_one_hot[test_labels_one_hot == 1] = 0.99
+    training_labels_one_hot[training_labels_one_hot == 0] = 0.01
+    training_labels_one_hot[training_labels_one_hot == 1] = 0.99
 
 
     # define the network
     my_net = np.load("bp.npy", allow_pickle=True)
 
     # training the network
-    train(my_net, test_imgs, test_labels_one_hot,
-            epochs=100, lr=0.1, batch_size=1)
+    train(my_net, training_imgs, training_labels_one_hot,
+            epochs=2, lr=0.01, batch_size=len(training_imgs)) #TODO lr seems pretty large as well in general?
     np.save(save_as, my_net)
+    if print_after:
+        print("next is after batch of other elements")
 
 def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
     """Train a neural network for multiple epochs."""
@@ -96,10 +121,9 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 
 def predictDrawing(data):
-    global no_of_different_labels
     fac = 0.99 / 255
     if not os.path.isfile("bp.npy"):
-        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, 2)]
+        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
         np.save("bp.npy", my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
     my_net = np.load('bp.npy', allow_pickle=True)
@@ -115,7 +139,6 @@ if __name__ == "__main__":
 
     # Define Data
     image_size = 28  # width and length
-    no_of_different_labels = 2  # i.e. 0, 1, 2, 3, ..., 9
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
@@ -142,7 +165,7 @@ if __name__ == "__main__":
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=10000, lr=0.1, batch_size=2)
+              epochs=10000, lr=0.01, batch_size=2)
         duration = time.time()-start
         np.save(save_as, my_net)
     my_net = np.load('drawing.npy', allow_pickle=True)
