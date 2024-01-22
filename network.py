@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import os
 
 no_of_different_labels = 8
+npy_file_name = "bp.npy"
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -22,11 +23,35 @@ def forward(net, X):
 
 
 def loss(OL, y, compute_derivative=False):
-    diff = OL - y
-    if not compute_derivative:
-        return np.mean(diff * diff)  # mean squared L2 norm (MSE)
-    else:
-        return (2.0 / y.shape[0]) * diff
+        """
+            Compute the cross-entropy loss.
+
+            Parameters:
+            OL (numpy.ndarray): Predicted probabilities for each class.
+                                    Shape: (number of samples, number of classes).
+            y (numpy.ndarray): True labels in one-hot encoded form.
+                                    Shape: (number of samples, number of classes).
+
+            Returns:
+            float: Mean cross-entropy loss over the batch.
+            """
+        if not compute_derivative:
+            # Small constant to prevent division by zero and log(0)
+            epsilon = 1e-12
+            y_pred = np.clip(OL, epsilon, 1. - epsilon)
+            N = y_pred.shape[0]
+
+            # Compute cross-entropy loss
+            ce_loss = -np.sum(y * np.log(y_pred + epsilon)) / N
+            return ce_loss
+        else:
+            return OL - y
+
+        diff = OL - y
+        if not compute_derivative:
+            return np.mean(diff * diff)  # mean squared L2 norm (MSE) TODO Chane loss function for classification
+        else:
+            return (2.0 / y.shape[0]) * diff
 
 
 def backward(net, A, d_loss):
@@ -56,7 +81,7 @@ def get_random_element_from_each_class():
     return training_data.reshape(no_of_different_labels, 785)
 def onlineTraining(last_index):
     
-    save_as = "bp.npy"
+    save_as = npy_file_name
     batch_size = no_of_different_labels
 
     # Define Data
@@ -88,12 +113,12 @@ def onlineTraining(last_index):
 
 
     # define the network
-    my_net = np.load("bp.npy", allow_pickle=True)
+    my_net = np.load(npy_file_name, allow_pickle=True)
 
     # training the network
     train(my_net, training_imgs, training_labels_one_hot,
-            epochs=2, lr=0.01, batch_size=len(training_imgs)) #TODO lr seems pretty large as well in general?
-    np.save(save_as, my_net)
+            epochs=100, lr=0.1, batch_size=len(training_imgs)) #TODO lr seems pretty large as well in general?
+    np.save(npy_file_name, my_net)
     if print_after:
         print("next is after batch of other elements")
 
@@ -105,8 +130,8 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
         # create mini-batch
         randomizer = np.arange(batch_size)
         np.random.shuffle(randomizer)
-        X = X[randomizer]
-        Y = Y[randomizer]
+        #X = X[randomizer]
+        #Y = Y[randomizer]
         outputs, activation_scores = forward(net, X)  # going forward
         loss_value = loss(outputs[-1], Y)
 
@@ -122,27 +147,25 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
 def predictDrawing(data):
     fac = 0.99 / 255
-    if not os.path.isfile("bp.npy"):
+    if not os.path.isfile(npy_file_name):
         my_net = [Layer(784, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
-        np.save("bp.npy", my_net)
+        np.save(npy_file_name, my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
-    my_net = np.load('bp.npy', allow_pickle=True)
+    my_net = np.load(npy_file_name, allow_pickle=True)
     net_outputs, _ = forward(my_net, test_imgs)
     print(net_outputs[-1])
 
 # entry point
 if __name__ == "__main__":
 
-    train_network = False
-    save_as = "drawing.npy"
-    batch_size = 2
+    train_network = True
 
     # Define Data
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("drawing.csv",
+    test_data = np.loadtxt("bp.csv",
                            delimiter=",")
     fac = 0.99 / 255
 
@@ -161,14 +184,14 @@ if __name__ == "__main__":
     if train_network:
         # define the network
         my_net = [Layer(image_pixels, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
-        net_outputs, _ = forward(my_net, test_imgs)
+        #net_outputs, _ = forward(my_net, test_imgs)
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=10000, lr=0.01, batch_size=2)
+              epochs=10000, lr=0.01, batch_size=100)
         duration = time.time()-start
-        np.save(save_as, my_net)
-    my_net = np.load('drawing.npy', allow_pickle=True)
+        np.save(npy_file_name, my_net)
+    #my_net = np.load(npy_file_name, allow_pickle=True)
 
     """
     Results:
