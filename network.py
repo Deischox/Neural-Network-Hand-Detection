@@ -8,6 +8,8 @@ import os
 
 no_of_different_labels = 8
 npy_file_name = "bp.npy"
+
+
 def forward(net, X):
     L = len(net)  # number of layers
     O = [None] * L  # list that collects the output tensors computed at each layer
@@ -22,36 +24,43 @@ def forward(net, X):
     return O, A
 
 
+def softmax(OL):
+    for i in range(len(OL)):
+        OL[i] /= sum(OL[i])
+    return OL
+
+
 def loss(OL, y, compute_derivative=False):
+    """
+        Compute the cross-entropy loss.
+
+        Parameters:
+        OL (numpy.ndarray): Predicted probabilities for each class.
+                                Shape: (number of samples, number of classes).
+        y (numpy.ndarray): True labels in one-hot encoded form.
+                                Shape: (number of samples, number of classes).
+
+        Returns:
+        float: Mean cross-entropy loss over the batch.
         """
-            Compute the cross-entropy loss.
+    if not compute_derivative:
+        # Small constant to prevent division by zero and log(0)
+        epsilon = 1e-12
+        y_pred = np.clip(OL, epsilon, 1. - epsilon)
+        N = y_pred.shape[0]
 
-            Parameters:
-            OL (numpy.ndarray): Predicted probabilities for each class.
-                                    Shape: (number of samples, number of classes).
-            y (numpy.ndarray): True labels in one-hot encoded form.
-                                    Shape: (number of samples, number of classes).
+        # Compute cross-entropy loss
+        ce_loss = -np.sum(y * np.log(y_pred + epsilon)) / N
+        return ce_loss
+    else:
+        return OL - y
 
-            Returns:
-            float: Mean cross-entropy loss over the batch.
-            """
-        if not compute_derivative:
-            # Small constant to prevent division by zero and log(0)
-            epsilon = 1e-12
-            y_pred = np.clip(OL, epsilon, 1. - epsilon)
-            N = y_pred.shape[0]
-
-            # Compute cross-entropy loss
-            ce_loss = -np.sum(y * np.log(y_pred + epsilon)) / N
-            return ce_loss
-        else:
-            return OL - y
-
-        diff = OL - y
-        if not compute_derivative:
-            return np.mean(diff * diff)  # mean squared L2 norm (MSE) TODO Chane loss function for classification
-        else:
-            return (2.0 / y.shape[0]) * diff
+    diff = OL - y
+    if not compute_derivative:
+        # mean squared L2 norm (MSE) TODO Chane loss function for classification
+        return np.mean(diff * diff)
+    else:
+        return (2.0 / y.shape[0]) * diff
 
 
 def backward(net, A, d_loss):
@@ -64,13 +73,16 @@ def update(net, lr=0.001):
     for layer in net:
         layer.updateWeights(lr)
 # Returns current online training example and random element from each other class
+
+
 def get_random_element_from_each_class():
     class_labels = np.arange(0, 8)
     csv_file = np.loadtxt("bp.csv", delimiter=",")
     new_example = csv_file[-1:]
     training_data = np.asarray(new_example)
-    label_of_new_example = int(new_example[0,0])
-    class_labels_without_new_example = class_labels[class_labels != label_of_new_example]
+    label_of_new_example = int(new_example[0, 0])
+    class_labels_without_new_example = class_labels[class_labels !=
+                                                    label_of_new_example]
     for clazz in class_labels_without_new_example:
         temp = [row for row in csv_file if int(row[0]) == clazz]
         index = np.random.randint(0, len(temp))
@@ -79,8 +91,10 @@ def get_random_element_from_each_class():
 
     # return array
     return training_data.reshape(no_of_different_labels, 785)
+
+
 def onlineTraining(last_index):
-    
+
     save_as = npy_file_name
     batch_size = no_of_different_labels
 
@@ -88,7 +102,7 @@ def onlineTraining(last_index):
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
-    #TODO remve
+    # TODO remve
     print_after = False
     # Read Data from CSV File
     if last_index % 2 == 0:
@@ -96,8 +110,8 @@ def onlineTraining(last_index):
         training_data = get_random_element_from_each_class()
     else:
         print_after = False
-        training_data = np.loadtxt("bp.csv", #test_data is only last row
-                           delimiter=",")[-1:]
+        training_data = np.loadtxt("bp.csv",  # test_data is only last row
+                                   delimiter=",")[-1:]
     fac = 0.99 / 255
 
     # include batch here
@@ -111,16 +125,16 @@ def onlineTraining(last_index):
     training_labels_one_hot[training_labels_one_hot == 0] = 0.01
     training_labels_one_hot[training_labels_one_hot == 1] = 0.99
 
-
     # define the network
     my_net = np.load(npy_file_name, allow_pickle=True)
 
     # training the network
     train(my_net, training_imgs, training_labels_one_hot,
-            epochs=100, lr=0.1, batch_size=len(training_imgs)) #TODO lr seems pretty large as well in general?
+          epochs=100, lr=0.1, batch_size=len(training_imgs))  # TODO lr seems pretty large as well in general?
     np.save(npy_file_name, my_net)
     if print_after:
         print("next is after batch of other elements")
+
 
 def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
     """Train a neural network for multiple epochs."""
@@ -130,15 +144,16 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
         # create mini-batch
         randomizer = np.arange(batch_size)
         np.random.shuffle(randomizer)
-        #X = X[randomizer]
-        #Y = Y[randomizer]
+        # X = X[randomizer]
+        # Y = Y[randomizer]
         outputs, activation_scores = forward(net, X)  # going forward
-        loss_value = loss(outputs[-1], Y)
+        outputs = softmax(outputs[-1])
+        loss_value = loss(outputs, Y)
 
         print("epoch: {}, loss: {}".format(e + 1, loss_value))
 
         loss_derivative = loss(
-            outputs[-1], Y, compute_derivative=True)  # going backward
+            outputs, Y, compute_derivative=True)  # going backward
         backward(
             net, activation_scores, loss_derivative)
 
@@ -148,12 +163,14 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 def predictDrawing(data):
     fac = 0.99 / 255
     if not os.path.isfile(npy_file_name):
-        my_net = [Layer(784, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
+        my_net = [Layer(784, 16), Layer(16, 16),
+                  Layer(16, no_of_different_labels)]
         np.save(npy_file_name, my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
     my_net = np.load(npy_file_name, allow_pickle=True)
     net_outputs, _ = forward(my_net, test_imgs)
     print(net_outputs[-1])
+
 
 # entry point
 if __name__ == "__main__":
@@ -183,15 +200,16 @@ if __name__ == "__main__":
     duration = None
     if train_network:
         # define the network
-        my_net = [Layer(image_pixels, 16), Layer(16, 16), Layer(16, no_of_different_labels)]
-        #net_outputs, _ = forward(my_net, test_imgs)
+        my_net = [Layer(image_pixels, 16), Layer(16, 16),
+                  Layer(16, no_of_different_labels)]
+        # net_outputs, _ = forward(my_net, test_imgs)
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=10000, lr=0.01, batch_size=100)
+              epochs=2000, lr=0.001, batch_size=100)
         duration = time.time()-start
         np.save(npy_file_name, my_net)
-    #my_net = np.load(npy_file_name, allow_pickle=True)
+    # my_net = np.load(npy_file_name, allow_pickle=True)
 
     """
     Results:
@@ -276,10 +294,7 @@ if __name__ == "__main__":
     correct = 0
     # comparing predictions and expected targets
     for i in range(0, test_imgs.shape[0]):
-        print(net_outputs[-1][i])
         e, p = helperPrediction(net_outputs[-1][i], test_labels_one_hot[i])
         if e == p:
             correct += 1
-        print("input_id: {}, net_output: {}, "
-              "expected_output: {}".format(i + 1, e, p))
     print(correct/test_imgs.shape[0], duration)
