@@ -8,6 +8,8 @@ import os
 
 no_of_different_labels = 8
 npy_file_name = "bp.npy"
+LABELS = ["House", "Car", "Inear headphones", "Bottle",
+          "On ear headphones", "Stick man", "TV-screen", "Sun"]
 
 
 def forward(net, X):
@@ -159,6 +161,27 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
 
         update(net, lr)  # updating model parameters
 
+# correct solution:
+
+
+def softmax_numpy(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+
+
+def printPredictions(predictions):
+    predictions = softmax_numpy(predictions)
+
+    sorted_indices = np.argsort(predictions)[::-1]
+
+    # Take the first three indices
+    top_three = sorted_indices[:3]
+    print(predictions)
+    print(top_three)
+
+    return f'{LABELS[top_three[0]]} {round(predictions[top_three[0]]*100,2)}% : {LABELS[top_three[1]]} {round(predictions[top_three[1]]*100,2)}% : {LABELS[top_three[2]]} {round(predictions[top_three[2]]*100,2)}%'
+
 
 def predictDrawing(data):
     fac = 0.99 / 255
@@ -169,7 +192,7 @@ def predictDrawing(data):
     test_imgs = np.asfarray(data) * fac + 0.01
     my_net = np.load(npy_file_name, allow_pickle=True)
     net_outputs, _ = forward(my_net, test_imgs)
-    print(net_outputs[-1])
+    return printPredictions(net_outputs[-1])
 
 
 # entry point
