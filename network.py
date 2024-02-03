@@ -57,13 +57,6 @@ def loss(OL, y, compute_derivative=False):
     else:
         return OL - y
 
-    diff = OL - y
-    if not compute_derivative:
-        # mean squared L2 norm (MSE) TODO Chane loss function for classification
-        return np.mean(diff * diff)
-    else:
-        return (2.0 / y.shape[0]) * diff
-
 
 def backward(net, A, d_loss):
     L = len(net)
