@@ -1,9 +1,7 @@
-from random import random
 
 import numpy as np
 import time
 from layer import Layer
-import matplotlib.pyplot as plt
 import os
 
 no_of_different_labels = 8
@@ -97,8 +95,6 @@ def onlineTraining(last_index):
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
-    # TODO remve
-    print_after = False
     # Read Data from CSV File
     if last_index % 2 == 0:
         print_after = True
@@ -153,8 +149,6 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
             net, activation_scores, loss_derivative)
 
         update(net, lr)  # updating model parameters
-
-# correct solution:
 
 
 def softmax_numpy(x):
