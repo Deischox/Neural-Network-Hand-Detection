@@ -12,4 +12,7 @@ def sigmoid(A, compute_derivative=False):
 
 
 def ReLU(A, compute_derivative=False):
-    return np.maximum(0, A)
+    if not compute_derivative:
+        return np.maximum(0, A)
+    else:
+        return np.where(A > 0, 1, 0)

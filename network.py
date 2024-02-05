@@ -1,13 +1,25 @@
 
 import numpy as np
 import time
+from activation import ReLU
 from layer import Layer
+import matplotlib.pyplot as plt
 import os
 
 no_of_different_labels = 8
-npy_file_name = "bp.npy"
+npy_file_name = "models/model.npy"
 LABELS = ["House", "Car", "Inear headphones", "Bottle",
           "On ear headphones", "Stick man", "TV-screen", "Sun"]
+
+
+# Read Data from CSV File
+eval_data = np.loadtxt("data/eval.csv",
+                       delimiter=",")
+fac = 0.99 / 255
+
+# include batch here
+eval_imgs = np.asfarray(eval_data[:, 1:]) * fac + 0.01
+eval_labels = np.asfarray(eval_data[:, :1])
 
 
 def forward(net, X):
@@ -70,7 +82,7 @@ def update(net, lr=0.001):
 
 def get_random_element_from_each_class():
     class_labels = np.arange(0, 8)
-    csv_file = np.loadtxt("bp.csv", delimiter=",")
+    csv_file = np.loadtxt("data/train.csv", delimiter=",")
     new_example = csv_file[-1:]
     training_data = np.asarray(new_example)
     label_of_new_example = int(new_example[0, 0])
@@ -87,21 +99,11 @@ def get_random_element_from_each_class():
 
 
 def onlineTraining(last_index):
-
-    save_as = npy_file_name
-    batch_size = no_of_different_labels
-
-    # Define Data
-    image_size = 28  # width and length
-    image_pixels = image_size * image_size
-
     # Read Data from CSV File
     if last_index % 2 == 0:
-        print_after = True
         training_data = get_random_element_from_each_class()
     else:
-        print_after = False
-        training_data = np.loadtxt("bp.csv",  # test_data is only last row
+        training_data = np.loadtxt("data/train.csv",  # test_data is only last row
                                    delimiter=",")[-1:]
     fac = 0.99 / 255
 
@@ -121,25 +123,32 @@ def onlineTraining(last_index):
 
     # training the network
     train(my_net, training_imgs, training_labels_one_hot,
-          epochs=100, lr=0.1, batch_size=len(training_imgs))  # TODO lr seems pretty large as well in general?
+          epochs=10, lr=0.01, batch_size=len(training_imgs), online=True)
     np.save(npy_file_name, my_net)
-    if print_after:
-        print("next is after batch of other elements")
 
 
-def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
+def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200, online=False):
     """Train a neural network for multiple epochs."""
 
+    loss_train = []
+    loss_eval = []
     for e in range(0, epochs):  # loop on epochs
 
         # create mini-batch
         randomizer = np.arange(batch_size)
         np.random.shuffle(randomizer)
-        # X = X[randomizer]
-        # Y = Y[randomizer]
+        X = X[randomizer]
+        Y = Y[randomizer]
+        # Eval
+        outputs_eval, _ = forward(net, eval_imgs)  # going forward
+        outputs_eval = softmax(outputs_eval[-1])
+        loss_eval_value = loss(outputs_eval, eval_labels)
+        loss_eval.append(loss_eval_value)
+
         outputs, activation_scores = forward(net, X)  # going forward
         outputs = softmax(outputs[-1])
         loss_value = loss(outputs, Y)
+        loss_train.append(loss_value)
 
         print("epoch: {}, loss: {}".format(e + 1, loss_value))
 
@@ -149,6 +158,14 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
             net, activation_scores, loss_derivative)
 
         update(net, lr)  # updating model parameters
+    if not online:
+        # Plot loss curves
+        plt.plot(loss_train, label='Train Loss')
+        plt.plot(loss_eval, label='Eval Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
 
 
 def softmax_numpy(x):
@@ -159,21 +176,15 @@ def softmax_numpy(x):
 
 def printPredictions(predictions):
     predictions = softmax_numpy(predictions)
-
     sorted_indices = np.argsort(predictions)[::-1]
-
-    # Take the first three indices
     top_three = sorted_indices[:3]
-    print(predictions)
-    print(top_three)
-
     return f'{LABELS[top_three[0]]} {round(predictions[top_three[0]]*100,2)}% : {LABELS[top_three[1]]} {round(predictions[top_three[1]]*100,2)}% : {LABELS[top_three[2]]} {round(predictions[top_three[2]]*100,2)}%'
 
 
 def predictDrawing(data):
     fac = 0.99 / 255
     if not os.path.isfile(npy_file_name):
-        my_net = [Layer(784, 16), Layer(16, 16),
+        my_net = [Layer(784, 16, activation_function=ReLU()), Layer(16, 16, activation_function=ReLU()),
                   Layer(16, no_of_different_labels)]
         np.save(npy_file_name, my_net)
     test_imgs = np.asfarray(data) * fac + 0.01
@@ -184,15 +195,13 @@ def predictDrawing(data):
 
 # entry point
 if __name__ == "__main__":
-
     train_network = True
-
     # Define Data
     image_size = 28  # width and length
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("bp.csv",
+    test_data = np.loadtxt("data/train.csv",
                            delimiter=",")
     fac = 0.99 / 255
 
@@ -216,84 +225,11 @@ if __name__ == "__main__":
         # training the network
         start = time.time()
         train(my_net, test_imgs, test_labels_one_hot,
-              epochs=2000, lr=0.001, batch_size=100)
+              epochs=2000, lr=0.001, batch_size=30)
         duration = time.time()-start
-        np.save(npy_file_name, my_net)
-    # my_net = np.load(npy_file_name, allow_pickle=True)
-
-    """
-    Results:
-
-    learning rate = 0.1
-
-    epoch: 10000 
-    batch size: 10
-    time: 5.4 sec
-    Accuracy: 21%
-
-    epoch: 10000
-    batch size: 100
-    time: 11 sec
-    Accuracy: 47%
-
-    epoch: 10000 
-    batch size: 1000
-    time: 72 sec
-    Accuracy: 68%
-
-    epoch: 10000 
-    batch size: 10000
-    time: 809 sec
-    Accuracy: 77%
-
-    
-    epoch: 20000
-
-    epoch: 20000 
-    batch size: 10
-    time: 10 sec
-    Accuracy: 23%
-
-    epoch: 20000
-    batch size: 100
-    time: 23 sec
-    Accuracy: 49%
-
-    epoch: 20000 
-    batch size: 1000
-    time: 147 sec
-    Accuracy: 78%
-
-    epoch: 20000 
-    batch size: 10000
-    time: X sec
-    Accuracy: X%
-
-    epoch: 50000 
-    batch size: 10000
-    time: 44 Minuten
-    Accuracy: 93%
-    -> net.npy
-
-    lr = 0.5
-    epoch = 20000
-    batch_size = 500
-    => time: 82 sec, Acc: 73%
-
-
-    epoch=50000
-    lr=0.1
-    batch_size=1000
-    => time: 328 sec Acc: 79%
-
-    epoch=500000
-    lr=0.1
-    batch_size=1000
-    => time: 3060 sec Acc: 79.48%
-
-
-
-    """
+        # np.save(npy_file_name, my_net)
+    else:
+        my_net = np.load(npy_file_name, allow_pickle=True)
 
     # making predictions with the trained network
     net_outputs, _ = forward(my_net, test_imgs)
@@ -302,9 +238,14 @@ if __name__ == "__main__":
         return output_array.argmax(), prediction_array.argmax()
 
     correct = 0
+    wrong = 0
     # comparing predictions and expected targets
     for i in range(0, test_imgs.shape[0]):
         e, p = helperPrediction(net_outputs[-1][i], test_labels_one_hot[i])
         if e == p:
             correct += 1
+        else:
+            wrong += 1
+
     print(correct/test_imgs.shape[0], duration)
+    print(correct, wrong)
