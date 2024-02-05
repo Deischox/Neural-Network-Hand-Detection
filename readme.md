@@ -9,7 +9,7 @@ The images are size 28x28 and the following classes can be drawn: \
 4: On-Ear Headphones \
 5: Stick man \
 6: TV-Screen \
-7: Sun \
+7: Sun 
 
 ## Disclaimer 
 This project is a University Project for the Course [Fundamentals of Machine Learning](https://en.unisi.it/ugov/degreecourse/480728) at the [Università degli Studi di Siena](https://www.unisi.it).
