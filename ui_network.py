@@ -1,7 +1,6 @@
 import pygame
 import sys
 import numpy as np
-import csv
 from network import forward, softmax_numpy
 from activation import sigmoid
 LABELS = ["House", "Car", "Inear headphones", "Bottle",
@@ -36,7 +35,7 @@ window = screen.get_rect()
 pygame.display.set_caption("Visualization of Neural Network")
 
 last_layer = None
-test_data = np.loadtxt("bp.csv",
+test_data = np.loadtxt("data/train.csv",
                        delimiter=",")
 
 
@@ -53,10 +52,10 @@ def init_values(index=0):
     circles_layer_three = []
     circles_layer_four = []
 
-    my_net = np.load("silas.npy", allow_pickle=True)
+    my_net = np.load("models/model.npy", allow_pickle=True)
     fac = 0.99 / 255
 
-    test_data = np.loadtxt("bp.csv",
+    test_data = np.loadtxt("data/train.csv",
                            delimiter=",")
     test_data = np.asfarray(test_data[:, 1:]) * fac + 0.01
     O, _ = forward(my_net, test_data[index][:784])
@@ -66,7 +65,7 @@ def init_values(index=0):
     O[2] = softmax_numpy(O[2])
     last_layer = O[2]
 
-    test_data = np.loadtxt("bp.csv",
+    test_data = np.loadtxt("data/train.csv",
                            delimiter=",")
     image_surface = pygame.surfarray.make_surface(
         np.reshape(test_data[index][:784], (28, 28)).astype(np.uint8))

@@ -1,15 +1,15 @@
 # Neural Network to classify hand-written classes
 
 In this project we created a neural network to classify 8 different classes of hand-written images.
-The images are size 28x28 and the following classes can be drawn:
-0: House
-1: Car
-2: In-Ear Headphones
-3: Bottle
-4: On-Ear Headphones
-5: Stick man
-6: TV-Screen
-7: Sun 
+The images are size 28x28 and the following classes can be drawn: \
+0: House \
+1: Car \
+2: In-Ear Headphones \
+3: Bottle \
+4: On-Ear Headphones \
+5: Stick man \
+6: TV-Screen \
+7: Sun \
 
 ## Disclaimer 
 This project is a University Project for the Course [Fundamentals of Machine Learning](https://en.unisi.it/ugov/degreecourse/480728) at the [Università degli Studi di Siena](https://www.unisi.it).
@@ -41,8 +41,9 @@ To delete the image you're currently seeing, press 'd'. It will be removed from 
 
 To display the network visualization:
 ```
-python TODO.py
+python ui_network.py
 ```
+You can move around, zoom in and out and go the next image.
 
 
 

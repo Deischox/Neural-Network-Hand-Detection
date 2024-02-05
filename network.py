@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 import os
 
 no_of_different_labels = 8
-npy_file_name = "silas.npy"
+npy_file_name = "models/model.npy"
 LABELS = ["House", "Car", "Inear headphones", "Bottle",
           "On ear headphones", "Stick man", "TV-screen", "Sun"]
 
 
 # Read Data from CSV File
-eval_data = np.loadtxt("bp_test.csv",
+eval_data = np.loadtxt("data/eval.csv",
                        delimiter=",")
 fac = 0.99 / 255
 
@@ -82,7 +82,7 @@ def update(net, lr=0.001):
 
 def get_random_element_from_each_class():
     class_labels = np.arange(0, 8)
-    csv_file = np.loadtxt("bp.csv", delimiter=",")
+    csv_file = np.loadtxt("data/train.csv", delimiter=",")
     new_example = csv_file[-1:]
     training_data = np.asarray(new_example)
     label_of_new_example = int(new_example[0, 0])
@@ -103,7 +103,7 @@ def onlineTraining(last_index):
     if last_index % 2 == 0:
         training_data = get_random_element_from_each_class()
     else:
-        training_data = np.loadtxt("bp.csv",  # test_data is only last row
+        training_data = np.loadtxt("data/train.csv",  # test_data is only last row
                                    delimiter=",")[-1:]
     fac = 0.99 / 255
 
@@ -123,11 +123,11 @@ def onlineTraining(last_index):
 
     # training the network
     train(my_net, training_imgs, training_labels_one_hot,
-          epochs=10, lr=0.01, batch_size=len(training_imgs))
+          epochs=10, lr=0.01, batch_size=len(training_imgs), online=True)
     np.save(npy_file_name, my_net)
 
 
-def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
+def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200, online=False):
     """Train a neural network for multiple epochs."""
 
     loss_train = []
@@ -158,13 +158,14 @@ def train(net, X, Y, epochs=2000, lr=0.001, batch_size=200):
             net, activation_scores, loss_derivative)
 
         update(net, lr)  # updating model parameters
-    # Plot loss curves
-    plt.plot(loss_train, label='Train Loss')
-    plt.plot(loss_eval, label='Eval Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
+    if not online:
+        # Plot loss curves
+        plt.plot(loss_train, label='Train Loss')
+        plt.plot(loss_eval, label='Eval Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
 
 
 def softmax_numpy(x):
@@ -200,7 +201,7 @@ if __name__ == "__main__":
     image_pixels = image_size * image_size
 
     # Read Data from CSV File
-    test_data = np.loadtxt("bp.csv",
+    test_data = np.loadtxt("data/train.csv",
                            delimiter=",")
     fac = 0.99 / 255
 

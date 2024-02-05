@@ -21,7 +21,7 @@ GRAY = (125, 125, 125)
 
 CURRENT_COLOR = WHITE
 
-FILE_PATH = "bp.csv"
+FILE_PATH = "data/train.csv"
 
 with open(FILE_PATH, "r") as file:
     reader = csv.reader(file)
@@ -36,7 +36,8 @@ def create_grid():
 def draw_grid(screen, grid):
     for y, row in enumerate(grid):
         for x, color in enumerate(row):
-            pygame.draw.rect(screen, color, (x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, color, (x * CELL_SIZE,
+                             y * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
 
 def load_grid_from_csv(index):
@@ -70,7 +71,6 @@ def load_grid(index):
 
 
 def remove_indicies_from_csv(to_be_removed_indices):
-    shutil.copyfile(FILE_PATH, "bp_old/backup_before_removing.csv")
     new_rows = rows_without_removed_indices(to_be_removed_indices)
     write_new_rows_to_csv(new_rows)
 
@@ -80,10 +80,12 @@ def write_new_rows_to_csv(new_rows):
         writer = csv.writer(write_file)
         writer.writerows(new_rows)
 
+
 def rows_without_removed_indices(indices):
     with open(FILE_PATH, "r", newline="") as read_file:
         reader = csv.reader(read_file)
-        new_rows = [_ for index, _ in enumerate(reader) if index not in indices]
+        new_rows = [_ for index, _ in enumerate(
+            reader) if index not in indices]
     return new_rows
 
 
@@ -114,7 +116,8 @@ def main():
                     index = index + 1
                     grid = load_grid_from_csv(index)
                 elif event.key == pygame.K_d:
-                    print(f"Deleting index {index} from {FILE_PATH} after program exits")
+                    print(
+                        f"Deleting index {index} from {FILE_PATH} after program exits")
                     indices_to_be_removed.append(index)
 
         screen.fill(WHITE)

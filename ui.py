@@ -15,6 +15,10 @@ CELL_SIZE = GRID_WIDTH // GRID_SIZE
 LEFT = 1
 RIGHT = 3
 
+# Create a font object
+pygame.init()
+font = pygame.font.Font(None, 24)
+
 # Colors
 WHITE = (0, 0, 0)
 BLACK = (255, 255, 255)
@@ -42,7 +46,7 @@ pygame_number_list = [pygame.K_0, pygame.K_1, pygame.K_2,
 
 def saveAsCSV(numpy_array, class_index):
     numpy_array = numpy_array[:, :, 0].flatten()
-    csv_file_path = "bp.csv"
+    csv_file_path = "data/train.csv"
     with open(csv_file_path, "a", newline='') as f:
         # Save the NumPy array to a CSV file
         writer = csv.writer(f)
@@ -65,7 +69,6 @@ def saveAsCSV(numpy_array, class_index):
                 writer.writerow(['6'] + numpy_array.tolist())  # TV-screen
             case pygame.K_7:
                 writer.writerow(['7'] + numpy_array.tolist())  # Sun
-    print(f"NumPy array saved as {csv_file_path}")
 
 
 def predict(numpy_array):
@@ -90,7 +93,7 @@ def main():
     prediction_text = ":::"
     grid = create_grid()
     drawing = False
-    last_index = get_csv_size("bp.csv")
+    last_index = get_csv_size("data/train.csv")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,7 +139,21 @@ def main():
         img3 = my_font.render(prediction_text.split(":")
                               [2], True, (255, 255, 255))
         screen.blit(img3, (5, 60))
-        print(prediction_text)
+
+        my_font = pygame.font.SysFont(None, 15)
+        help_text = my_font.render(
+            "Press Button to train online: (0:House 1:Car, 2:Inear-headphones, 3:Bottle)", True, (255, 255, 255))
+        text_rect_help = help_text.get_rect(
+            center=(190, GRID_HEIGHT-30))
+        screen.blit(help_text, text_rect_help)
+        help_text = my_font.render(
+            "(4:On-ear-headphones  5:Stick man, 6:TV-screen, 7:Sun)", True, (255, 255, 255))
+        text_rect_help = help_text.get_rect(
+            center=(150, GRID_HEIGHT-15))
+        screen.blit(help_text, text_rect_help)
+
+        # Blit text onto the screen
+        screen.blit(help_text, text_rect_help)
         pygame.display.update()
 
 
