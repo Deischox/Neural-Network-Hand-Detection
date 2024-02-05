@@ -1,0 +1,59 @@
+Results:
+
+     learning rate = 0.1
+
+     epoch: 10000 
+     batch size: 10
+     time: 5.4 sec
+     Accuracy: 21%
+
+     epoch: 10000
+     batch size: 100
+     time: 11 sec
+     Accuracy: 47%
+
+     epoch: 10000 
+     batch size: 1000
+     time: 72 sec
+     Accuracy: 68%
+
+     epoch: 10000 
+     batch size: 10000
+     time: 809 sec
+     Accuracy: 77%
+
+     epoch: 20000 
+     batch size: 10
+     time: 10 sec
+     Accuracy: 23%
+
+     epoch: 20000
+     batch size: 100
+     time: 23 sec
+     Accuracy: 49%
+
+     epoch: 20000 
+     batch size: 1000
+     time: 147 sec
+     Accuracy: 78%
+
+     epoch: 50000 
+     batch size: 10000
+     time: 44 Minuten
+     Accuracy: 93%
+
+     lr = 0.5
+     epoch = 20000
+     batch_size = 500
+     => time: 82 sec, Acc: 73%
+
+
+     epoch=50000
+     lr=0.1
+     batch_size=1000
+     => time: 328 sec Acc: 79%
+
+     epoch=500000
+     lr=0.1
+     batch_size=1000
+     => time: 3060 sec Acc: 79.48%
